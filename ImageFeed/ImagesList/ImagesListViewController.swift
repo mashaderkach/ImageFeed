@@ -1,17 +1,15 @@
-//
-//  ViewController.swift
-//  ImageFeed
-//
-//  Created by Maryia Dziarkach on 26.12.25.
-//
+// ViewController.swift
 
 import UIKit
 
 final class ImagesListViewController: UIViewController {
     
     // MARK: - Properties
+    private enum Constants {
+        static let photosCount = 20
+    }
     
-    private let photosName: [String] = Array(0..<20).map{ "\($0)" }
+    private let photosName: [String] = (0..<Constants.photosCount).map(String.init)
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -25,7 +23,7 @@ final class ImagesListViewController: UIViewController {
     
     // MARK: - Outlets
     
-    @IBOutlet private var tableView: UITableView!
+    @IBOutlet private weak var tableView: UITableView!
     
     
     // MARK: - Lifecycle
