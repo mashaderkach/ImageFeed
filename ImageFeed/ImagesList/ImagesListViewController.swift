@@ -39,7 +39,7 @@ final class ImagesListViewController: UIViewController {
     
     func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
         let imageName = photosName[indexPath.row]
-
+        
         guard let image = UIImage(named: imageName) else {
             return
         }

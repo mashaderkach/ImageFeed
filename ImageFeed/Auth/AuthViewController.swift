@@ -2,7 +2,7 @@
 import UIKit
 
 protocol AuthViewControllerDelegate: AnyObject {
-    func didAuthentificate(_ vc: AuthViewController)
+    func didAuthenticate(_ vc: AuthViewController)
 }
 
 final class AuthViewController: UIViewController {
@@ -35,8 +35,10 @@ final class AuthViewController: UIViewController {
     }
     
     private func configureBackButton() {
-        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "nav_back_button")
-        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "nav_back_button")
+        let backImage = UIImage(resource: .navBackButton)
+        
+        navigationController?.navigationBar.backIndicatorImage = backImage
+        navigationController?.navigationBar.backIndicatorTransitionMaskImage = backImage
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem?.tintColor = UIColor(hex: "#1A1B22")
     }
@@ -47,12 +49,12 @@ final class AuthViewController: UIViewController {
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         fetchOAuthToken(code) { [weak self] result in
-            guard let self = self else { return }
+            guard let self else { return }
             
             switch result {
             case .success:
                 vc.dismiss(animated: true)
-                self.delegate?.didAuthentificate(self)
+                self.delegate?.didAuthenticate(self)
             case .failure:
                 break
             }

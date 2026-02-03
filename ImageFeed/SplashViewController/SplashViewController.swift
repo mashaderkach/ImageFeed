@@ -1,6 +1,5 @@
 // SplashViewController.swift
 
-import Foundation
 import UIKit
 
 final class SplashViewController: UIViewController {
@@ -9,7 +8,7 @@ final class SplashViewController: UIViewController {
     
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
     
-    private let storage = OAuth2TokenStorage()
+    private let storage = OAuth2TokenStorage.shared
     
     // MARK: - Lifecycle
     
@@ -35,7 +34,9 @@ final class SplashViewController: UIViewController {
     // MARK: - Methods
     
     private func switchToTabBarController() {
-        guard let window = UIApplication.shared.windows.first else {
+        guard
+            let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+            let window = windowScene.windows.first else {
             assertionFailure("Invalid window configuration")
             return
         }
@@ -65,10 +66,10 @@ final class SplashViewController: UIViewController {
     }
 }
 
-// MARK: - Extenstion
+// MARK: - Extension
 
 extension SplashViewController: AuthViewControllerDelegate {
-    func didAuthentificate(_ vc: AuthViewController) {
+    func didAuthenticate(_ vc: AuthViewController) {
         vc.navigationController?.dismiss(animated: true)
     }
 }
