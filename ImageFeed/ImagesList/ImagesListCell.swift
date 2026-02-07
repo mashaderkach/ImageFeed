@@ -1,6 +1,4 @@
-//
-//  ImagesListCell.swift
-//  ImageFeed
+// ImagesListCell.swift
 
 import UIKit
 
