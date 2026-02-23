@@ -12,59 +12,60 @@ final class OAuth2Service {
     private let tokenStorage = OAuth2TokenStorage.shared
     private let decoder = JSONDecoder()
     
-    private enum NetworkError: Error {
-        case codeError
-    }
+    private var currentTask: URLSessionTask?
+    private var lastCode: String?
     
-    private enum HTTPMethod: String {
-        case get = "GET"
-        case post = "POST"
-        case put = "PUT"
-        case delete = "DELETE"
+    private(set) var authToken: String? {
+        get {
+            return tokenStorage.token
+        }
+        set {
+            tokenStorage.token = newValue
+        }
     }
     
     // MARK: - Methods
     
-    func fetchOAuthToken(code: String, handler: @escaping (Result<String, Error>) -> Void) {
+    func fetchOAuthToken(
+        code: String, handler: @escaping (Result<String, Error>) -> Void
+    ) {
+        assert(Thread.isMainThread)
+        guard lastCode != code else {
+            handler(.failure(NetworkError.invalidRequest))
+            return
+        }
+        currentTask?.cancel()
+        lastCode = code
+        
         guard let request = makeOAuthTokenRequest(code: code) else {
+            handler(.failure(NetworkError.invalidRequest))
             return
         }
         
-        let dataTask = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            if let error = error {
-                print("Сетевая ошибка: \(error)")
-                handler(.failure(error))
-                return
-            }
-            
-            if let response = response as? HTTPURLResponse,
-               response.statusCode < 200 || response.statusCode >= 300 {
-                print("Ошибка сервера")
-                handler(.failure(NetworkError.codeError))
-                return
-            }
-            
-            guard let data = data else {
-                print("Ошибка сервера")
-                handler(.failure(NetworkError.codeError))
-                return
-            }
-            
-            do {
-                guard let self else { return }
-                let responseBody = try self.decoder.decode(OAuthTokenResponseBody.self, from: data)
-                let token = responseBody.accessToken
-                tokenStorage.token = token
-                DispatchQueue.main.async {
-                    handler(.success(token))
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    print("Сетевая декодирования: \(error)")
+        let dataTask = URLSession.shared.objectTask(for: request) {
+            [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let responseBody):
+                    let authToken = responseBody.accessToken
+                    self.authToken = authToken
+                    handler(.success(authToken))
+                    
+                    self.currentTask = nil
+                    self.lastCode = nil
+                    
+                case .failure(let error):
+                    print("[fetchOAuthToken]: Ошибка запроса: \(error.localizedDescription)")
                     handler(.failure(error))
+                    
+                    self.currentTask = nil
+                    self.lastCode = nil
                 }
             }
         }
+        self.currentTask = dataTask
         dataTask.resume()
     }
     
@@ -73,12 +74,13 @@ final class OAuth2Service {
         urlComponents.scheme = "https"
         urlComponents.host = "unsplash.com"
         urlComponents.path = "/oauth/token"
+        
         urlComponents.queryItems = [
             URLQueryItem(name: "client_id", value: Constants.accessKey),
             URLQueryItem(name: "client_secret", value: Constants.secretKey),
             URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
             URLQueryItem(name: "code", value: code),
-            URLQueryItem(name: "grant_type", value: "authorization_code")
+            URLQueryItem(name: "grant_type", value: "authorization_code"),
         ]
         
         guard let url = urlComponents.url else {
@@ -89,7 +91,6 @@ final class OAuth2Service {
         request.httpMethod = HTTPMethod.post.rawValue
         return request
     }
-    
 }
 
 // MARK: - Struct

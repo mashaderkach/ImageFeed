@@ -11,7 +11,6 @@ final class SingleImageViewController: UIViewController {
         static let maxZoomScale: CGFloat = 1.25
     }
     
-    
     // MARK: - Properties
     
     var image: UIImage? {
@@ -21,12 +20,10 @@ final class SingleImageViewController: UIViewController {
         }
     }
     
-    
     // MARK: - Outlets
     
     @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet private weak var scrollView: UIScrollView!
-    
     
     // MARK: - Actions
     
@@ -43,7 +40,6 @@ final class SingleImageViewController: UIViewController {
         present(controller, animated: true)
     }
     
-    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -51,7 +47,6 @@ final class SingleImageViewController: UIViewController {
         setupScrollView()
         updateImage()
     }
-    
     
     // MARK: - Setup
     private func setupScrollView() {
@@ -66,7 +61,6 @@ final class SingleImageViewController: UIViewController {
         imageView.frame.size = image.size
         rescaleAndCenterImage(image)
     }
-    
     
     // MARK: - Layout
     
@@ -100,8 +94,7 @@ final class SingleImageViewController: UIViewController {
     }
 }
 
-
-// MARK: - Extestions
+// MARK: - Extensions
 
 extension SingleImageViewController: UIScrollViewDelegate{
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
