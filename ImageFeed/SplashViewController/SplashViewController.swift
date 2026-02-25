@@ -9,7 +9,12 @@ final class SplashViewController: UIViewController {
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
     private let storage = OAuth2TokenStorage.shared
     private let profileService = ProfileService.shared
-    private var imageView: UIImageView!
+    private let imageView: UIImageView = {
+        let iv = UIImageView()
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        iv.image = UIImage(resource: .appIcon)
+        return iv
+    }()
     
     // MARK: - Lifecycle
     
@@ -43,10 +48,6 @@ final class SplashViewController: UIViewController {
     
     private func setupImageView() {
         view.backgroundColor = UIColor(hex: "#1A1B22")
-        
-        imageView = UIImageView()
-        imageView.image = UIImage(named: "splash_screen_logo")
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(imageView)
         
@@ -83,6 +84,8 @@ final class SplashViewController: UIViewController {
 
 extension SplashViewController: AuthViewControllerDelegate {
     func didAuthenticate(_ vc: AuthViewController) {
+        UIBlockingProgressHUD.show()
+        
         vc.navigationController?.dismiss(animated: true)
         
         guard let token = storage.token else { return }
@@ -90,12 +93,13 @@ extension SplashViewController: AuthViewControllerDelegate {
     }
     
     func fetchProfile(token: String) {
-        UIBlockingProgressHUD.show()
-        
         profileService.fetchProfile(token: token) { [weak self] result in
+            guard let self else { return }
+            
+            
             UIBlockingProgressHUD.dismiss()
             
-            guard let self = self else { return }
+            
             switch result {
             case .success(let profile):
                 ProfileImageService.shared.fetchProfileImageURL(username: profile.username) { _ in }
@@ -105,4 +109,5 @@ extension SplashViewController: AuthViewControllerDelegate {
             }
         }
     }
+    
 }

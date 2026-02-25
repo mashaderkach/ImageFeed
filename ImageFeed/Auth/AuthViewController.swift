@@ -55,14 +55,16 @@ extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         UIBlockingProgressHUD.show()
         
+        vc.dismiss(animated: true)
+        
         fetchOAuthToken(code) { [weak self] result in
-            UIBlockingProgressHUD.dismiss()
             
             guard let self else { return }
             
+            UIBlockingProgressHUD.dismiss()
+            
             switch result {
             case .success:
-                vc.dismiss(animated: true)
                 self.delegate?.didAuthenticate(self)
             case .failure:
                 self.showAuthErrorAlert()

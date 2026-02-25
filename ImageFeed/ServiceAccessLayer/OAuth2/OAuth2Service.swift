@@ -17,7 +17,7 @@ final class OAuth2Service {
     
     private(set) var authToken: String? {
         get {
-            return tokenStorage.token
+            tokenStorage.token
         }
         set {
             tokenStorage.token = newValue
@@ -44,25 +44,24 @@ final class OAuth2Service {
         
         let dataTask = URLSession.shared.objectTask(for: request) {
             [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
+            
+            guard let self else { return }
+            
+            switch result {
+            case .success(let responseBody):
+                let authToken = responseBody.accessToken
+                self.authToken = authToken
+                handler(.success(authToken))
                 
-                switch result {
-                case .success(let responseBody):
-                    let authToken = responseBody.accessToken
-                    self.authToken = authToken
-                    handler(.success(authToken))
-                    
-                    self.currentTask = nil
-                    self.lastCode = nil
-                    
-                case .failure(let error):
-                    print("[fetchOAuthToken]: Ошибка запроса: \(error.localizedDescription)")
-                    handler(.failure(error))
-                    
-                    self.currentTask = nil
-                    self.lastCode = nil
-                }
+                self.currentTask = nil
+                self.lastCode = nil
+                
+            case .failure(let error):
+                print("[fetchOAuthToken]: Ошибка запроса: \(error.localizedDescription)")
+                handler(.failure(error))
+                
+                self.currentTask = nil
+                self.lastCode = nil
             }
         }
         self.currentTask = dataTask

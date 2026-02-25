@@ -38,7 +38,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		42B972952F41BD290024FF6D /* Exceptions for "ImageFeed" folder in "ImageFeed" target */ = {
+		42453F332F4DD7DF008B32AA /* Exceptions for "ImageFeed" folder in "ImageFeed" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -48,10 +48,10 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		42B972842F41BD290024FF6D /* ImageFeed */ = {
+		42453F1C2F4DD7DF008B32AA /* ImageFeed */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				42B972952F41BD290024FF6D /* Exceptions for "ImageFeed" folder in "ImageFeed" target */,
+				42453F332F4DD7DF008B32AA /* Exceptions for "ImageFeed" folder in "ImageFeed" target */,
 			);
 			path = ImageFeed;
 			sourceTree = "<group>";
@@ -90,7 +90,7 @@
 		428304722EFF1B40001FACBD = {
 			isa = PBXGroup;
 			children = (
-				42B972842F41BD290024FF6D /* ImageFeed */,
+				42453F1C2F4DD7DF008B32AA /* ImageFeed */,
 				42F629532F326CB90010D137 /* Frameworks */,
 				4283047C2EFF1B40001FACBD /* Products */,
 			);
@@ -130,7 +130,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				42B972842F41BD290024FF6D /* ImageFeed */,
+				42453F1C2F4DD7DF008B32AA /* ImageFeed */,
 			);
 			name = ImageFeed;
 			packageProductDependencies = (
@@ -601,7 +601,7 @@
 			repositoryURL = "https://github.com/relatedcode/ProgressHUD";
 			requirement = {
 				kind = exactVersion;
-				version = 15.0.1;
+				version = 14.1.1;
 			};
 		};
 		428BBA6C2F4B5198001D5194 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */ = {

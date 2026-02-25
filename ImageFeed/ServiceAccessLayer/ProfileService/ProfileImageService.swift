@@ -16,12 +16,6 @@ struct ProfileImage: Codable {
     let small: String
     let medium: String
     let large: String
-    
-    enum CodingKeys: String, CodingKey {
-        case small
-        case medium
-        case large
-    }
 }
 
 final class ProfileImageService {
@@ -34,7 +28,7 @@ final class ProfileImageService {
     private(set) var avatarURL: String?
     private var currentTask: URLSessionTask?
     private var profileImageServiceObserver: NSObjectProtocol?
-    static let didChangeNotification = Notification.Name(rawValue: "ProfileImageProviderDidChange")
+    static let didChangeNotification = Notification.Name("ProfileImageProviderDidChange")
     
     // MARK: - Methods
     
@@ -55,7 +49,7 @@ final class ProfileImageService {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let result):
-                    guard let self = self else { return }
+                    guard let self else { return }
                     self.avatarURL = result.profileImage.small
                     completion(.success(result.profileImage.small))
                     
