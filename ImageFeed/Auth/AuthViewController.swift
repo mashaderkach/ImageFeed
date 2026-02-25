@@ -1,5 +1,9 @@
 // AuthViewController.swift
+
 import UIKit
+import ProgressHUD
+
+// MARK: - Protocol
 
 protocol AuthViewControllerDelegate: AnyObject {
     func didAuthenticate(_ vc: AuthViewController)
@@ -16,6 +20,7 @@ final class AuthViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureBackButton()
+        
     }
     
     // MARK: - Methods
@@ -48,15 +53,21 @@ final class AuthViewController: UIViewController {
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        UIBlockingProgressHUD.show()
+        
+        vc.dismiss(animated: true)
+        
         fetchOAuthToken(code) { [weak self] result in
+            
             guard let self else { return }
+            
+            UIBlockingProgressHUD.dismiss()
             
             switch result {
             case .success:
-                vc.dismiss(animated: true)
                 self.delegate?.didAuthenticate(self)
             case .failure:
-                break
+                self.showAuthErrorAlert()
             }
         }
     }
@@ -74,3 +85,15 @@ extension AuthViewController {
     }
 }
 
+extension AuthViewController {
+    func showAuthErrorAlert() {
+        let alertController = UIAlertController(
+            title: "Что-то пошло не так",
+            message: "Не удалось войти в систему",
+            preferredStyle: .alert
+        )
+        let okAction = UIAlertAction(title: "Ок", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
+    }
+}

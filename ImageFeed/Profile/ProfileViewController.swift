@@ -1,6 +1,7 @@
 // ProfileViewController.swift
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
@@ -11,7 +12,7 @@ final class ProfileViewController: UIViewController {
     private var loginNameLabel: UILabel!
     private var descriptionLabel: UILabel!
     private var logoutButton: UIButton!
-    
+    private var profileImageServiceObserver: NSObjectProtocol?
     
     // MARK: - Lifecycle
     
@@ -20,8 +21,22 @@ final class ProfileViewController: UIViewController {
         setupView()
         setupSubviews()
         setupConstraints()
+        
+        if let profile = ProfileService.shared.profile {
+            updateProfileDetails(with: profile)
+        }
+        
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self else { return }
+                self.updateAvatar()
+            }
+        updateAvatar()
     }
-    
     
     // MARK: - Methods
     
@@ -55,14 +70,13 @@ final class ProfileViewController: UIViewController {
         logoutButton.setImage(UIImage(named: "logout_button"), for: .normal)
         logoutButton.tintColor = UIColor(hex: "#F56B6C")
         logoutButton.translatesAutoresizingMaskIntoConstraints = false
-        
         [
-                avatarImageView,
-                nameLabel,
-                loginNameLabel,
-                descriptionLabel,
-                logoutButton
-            ].forEach { view.addSubview($0) }
+            avatarImageView,
+            nameLabel,
+            loginNameLabel,
+            descriptionLabel,
+            logoutButton
+        ].forEach { view.addSubview($0) }
     }
     
     private func setupConstraints() {
@@ -85,23 +99,52 @@ final class ProfileViewController: UIViewController {
             logoutButton.centerYAnchor.constraint(equalTo: avatarImageView.centerYAnchor)
         ])
     }
-}
-
-
-// MARK: - Extensions
-
-extension UIColor {
-    convenience init?(hex: String) {
-        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+    
+    private func updateProfileDetails(with profile: Profile) {
+        nameLabel.text = profile.name.isEmpty
+        ? "Имя не указано"
+        : profile.name
+        loginNameLabel.text = profile.loginName.isEmpty
+        ? "@неизвестный_пользователь"
+        : profile.loginName
+        descriptionLabel.text = (profile.bio?.isEmpty ?? true)
+        ? "Профиль не заполнен"
+        : profile.bio
+    }
+    
+    private func updateAvatar() {
+        print("URL аватарки:", ProfileImageService.shared.avatarURL ?? "nil")
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
         
-        var rgb: UInt64 = 0
-        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+        let placeholderImage = UIImage(systemName: "person.circle.fill")?
+            .withTintColor(.lightGray, renderingMode: .alwaysOriginal)
+            .withConfiguration(UIImage.SymbolConfiguration(pointSize: 70, weight: .regular, scale: .large))
         
-        let r = CGFloat((rgb & 0xFF0000) >> 16) / 255
-        let g = CGFloat((rgb & 0x00FF00) >> 8) / 255
-        let b = CGFloat(rgb & 0x0000FF) / 255
-        
-        self.init(red: r, green: g, blue: b, alpha: 1.0)
+        let processor = RoundCornerImageProcessor(cornerRadius: 16)
+        avatarImageView.kf.indicatorType = .activity
+        avatarImageView.kf.setImage(
+            with: url,
+            placeholder: placeholderImage,
+            options: [
+                .processor(processor),
+                .scaleFactor(UIScreen.main.scale),
+                .cacheOriginalImage,
+                .forceRefresh
+            ]) { result in
+                switch result {
+                case .success(let value):
+                    print(value.image)
+                    print(value.cacheType)
+                    print(value.source)
+                    
+                case .failure(let error):
+                    print(error)
+                }
+            }
     }
 }
+
+

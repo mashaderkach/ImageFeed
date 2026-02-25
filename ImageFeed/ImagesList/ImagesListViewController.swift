@@ -20,11 +20,9 @@ final class ImagesListViewController: UIViewController {
     
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     
-    
     // MARK: - Outlets
     
     @IBOutlet private weak var tableView: UITableView!
-    
     
     // MARK: - Lifecycle
     
@@ -33,7 +31,6 @@ final class ImagesListViewController: UIViewController {
         
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
     }
-    
     
     // MARK: - Methods
     
@@ -47,7 +44,7 @@ final class ImagesListViewController: UIViewController {
         cell.cellImage.image = image
         
         let currentDate = Date()
-        cell.dataLabel.text = dateFormatter.string(from: currentDate) 
+        cell.dataLabel.text = dateFormatter.string(from: currentDate)
         
         let isLiked = indexPath.row % 2 == 0
         let likeImage = isLiked ? UIImage(named: "like_button_on") : UIImage(named: "like_button_off")
@@ -72,7 +69,6 @@ final class ImagesListViewController: UIViewController {
         }
     }
 }
-
 
 // MARK: - Extensions
 
