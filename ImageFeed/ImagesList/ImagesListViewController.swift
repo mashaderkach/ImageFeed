@@ -5,6 +5,7 @@ import UIKit
 final class ImagesListViewController: UIViewController {
     
     // MARK: - Properties
+    
     private enum Constants {
         static let photosCount = 20
     }
@@ -19,6 +20,8 @@ final class ImagesListViewController: UIViewController {
     }()
     
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
+    
+    private let imageListService = ImageListService()
     
     // MARK: - Outlets
     
@@ -88,6 +91,12 @@ extension ImagesListViewController: UITableViewDelegate { //
         let scale = imageViewWidth / imageWidth
         let cellHeight = image.size.height * scale + imageInsets.top + imageInsets.bottom
         return cellHeight
+    }
+    
+    func tableView(_: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row == imageListService.photos.count {
+            imageListService.fetchPhotosNextPage()
+        }
     }
 }
 
