@@ -20,6 +20,8 @@ final class SingleImageViewController: UIViewController {
         }
     }
     
+    var imageURL: URL?
+    
     // MARK: - Outlets
     
     @IBOutlet private weak var imageView: UIImageView!
@@ -46,20 +48,47 @@ final class SingleImageViewController: UIViewController {
         super.viewDidLoad()
         setupScrollView()
         updateImage()
+        loadFullImage()
     }
     
     // MARK: - Setup
     private func setupScrollView() {
+        scrollView.delegate = self
         scrollView.minimumZoomScale = Constants.minZoomScale
         scrollView.maximumZoomScale = Constants.maxZoomScale
         scrollView.delegate = self
+        scrollView.contentInsetAdjustmentBehavior = .never
+    }
+    
+    private func loadFullImage() {
+        guard let url = imageURL else { return }
+        
+        UIBlockingProgressHUD.show()
+        imageView.kf.setImage(with: url) { [weak self] result in
+            UIBlockingProgressHUD.dismiss()
+            
+            guard let self else { return }
+            
+            switch result {
+            case .success(let imageResult):
+                self.imageView.image = imageResult.image
+                //                self.imageView.frame.size = imageResult.image.size
+                //                self.scrollView.contentSize = imageResult.image.size
+                self.imageView.sizeToFit()
+                self.rescaleAndCenterImage(imageResult.image)
+            case .failure:
+                self.showError()
+            }
+        }
     }
     
     private func updateImage() {
         guard let image else { return }
         imageView.image = image
         imageView.frame.size = image.size
+        scrollView.contentSize = image.size
         rescaleAndCenterImage(image)
+        
     }
     
     // MARK: - Layout
@@ -72,9 +101,16 @@ final class SingleImageViewController: UIViewController {
         
         let widthScale = scrollViewSize.width / imageSize.width
         let heightScale = scrollViewSize.height / imageSize.height
-        let scale = min(Constants.maxZoomScale, max(Constants.minZoomScale, min(widthScale, heightScale)))
+        let scale = max(widthScale, heightScale)
+        
         
         scrollView.setZoomScale(scale, animated: false)
+        scrollView.layoutIfNeeded()
+        
+        let offsetX = max((imageView.frame.width - scrollView.bounds.width) / 2, 0)
+            let offsetY = max((imageView.frame.height - scrollView.bounds.height) / 2, 0)
+            scrollView.contentOffset = CGPoint(x: offsetX, y: offsetY)
+        
         centerImage()
     }
     
@@ -91,6 +127,22 @@ final class SingleImageViewController: UIViewController {
             bottom: verticalInset,
             right: horizontalInset
         )
+    }
+    
+    private func showError() {
+        let alert = UIAlertController(
+                title: nil,
+                message: "Что-то пошло не так. Попробовать ещё раз?",
+                preferredStyle: .alert
+            )
+            
+            alert.addAction(UIAlertAction(title: "Не надо", style: .cancel))
+            
+            alert.addAction(UIAlertAction(title: "Повторить", style: .default, handler: { [weak self] _ in
+                self?.loadFullImage()
+            }))
+            
+            present(alert, animated: true)
     }
 }
 

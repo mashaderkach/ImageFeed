@@ -6,6 +6,9 @@ final class ImageListService {
     
     // MARK: - Properties
     
+    static let shared = ImageListService()
+    private init() {}
+    
     private(set) var photos: [Photo] = []
     private var lastLoadedPage: Int?
     private var task: URLSessionTask?
@@ -16,7 +19,6 @@ final class ImageListService {
     // MARK: - Methods
     
     func fetchPhotosNextPage() {
-        
         guard task == nil else { return }
         
         let nextPage = (lastLoadedPage ?? 0) + 1
@@ -27,6 +29,8 @@ final class ImageListService {
         urlComponents.path = "/photos"
         urlComponents.queryItems = [
             URLQueryItem(name: "page", value: "\(nextPage)"),
+            URLQueryItem(name: "per_page", value: "10")
+            
         ]
         
         guard let url = urlComponents.url else { return }
@@ -51,6 +55,7 @@ final class ImageListService {
                             welcomeDescription: result.description,
                             thumbImageURL: result.urls.thumb,
                             largeImageURL: result.urls.full,
+                            fullImageURL: result.urls.full,
                             isLiked: result.likedByUser
                         )
                     }
@@ -68,5 +73,54 @@ final class ImageListService {
                 }
             }
         }
+        task?.resume()
+    }
+    
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
+        
+        var urlComponents = URLComponents()
+        urlComponents.scheme = "https"
+        urlComponents.host = "api.unsplash.com"
+        urlComponents.path = "/photos/\(photoId)/like"
+        
+        guard let url = urlComponents.url else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = isLike ? HTTPMethod.post.rawValue : HTTPMethod.delete.rawValue
+        
+        guard let token = OAuth2Service.shared.authToken else { return }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let dataTask = URLSession.shared.data(for: request) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                switch result {
+                case .success:
+                    if let index = self.photos.firstIndex(where: { $0.id == photoId}) {
+                        let photo = self.photos[index]
+                        let newPhoto = Photo(
+                            id: photo.id,
+                            size: photo.size,
+                            createdAt: photo.createdAt,
+                            welcomeDescription: photo.welcomeDescription,
+                            thumbImageURL: photo.thumbImageURL,
+                            largeImageURL: photo.largeImageURL,
+                            fullImageURL: photo.fullImageURL,
+                            isLiked: !photo.isLiked
+                        )
+                        self.photos[index] = newPhoto
+                    }
+                    
+                    completion(.success(()))
+                case .failure(let error):
+                    completion(.failure(error))
+                }
+            }
+        }
+        dataTask.resume()
+    }
+    
+    func resetPhotos() {
+        photos.removeAll()
     }
 }
