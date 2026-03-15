@@ -87,7 +87,7 @@ final class ProfileImageService {
     }
     
     func resetAvatarURL() {
-        avatarURL == nil
+        avatarURL = nil
     }
 }
 

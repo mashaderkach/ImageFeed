@@ -72,8 +72,6 @@ final class SingleImageViewController: UIViewController {
             switch result {
             case .success(let imageResult):
                 self.imageView.image = imageResult.image
-                //                self.imageView.frame.size = imageResult.image.size
-                //                self.scrollView.contentSize = imageResult.image.size
                 self.imageView.sizeToFit()
                 self.rescaleAndCenterImage(imageResult.image)
             case .failure:

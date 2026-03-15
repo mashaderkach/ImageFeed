@@ -13,6 +13,7 @@ final class ProfileViewController: UIViewController {
     private var descriptionLabel: UILabel!
     private var logoutButton: UIButton!
     private var profileImageServiceObserver: NSObjectProtocol?
+    private var animationLayers = Set<CALayer>()
     
     // MARK: - Lifecycle
     
@@ -141,7 +142,6 @@ final class ProfileViewController: UIViewController {
                     print(value.image)
                     print(value.cacheType)
                     print(value.source)
-                    
                 case .failure(let error):
                     print(error)
                 }

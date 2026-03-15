@@ -36,10 +36,9 @@ final class ProfileLogoutService {
             .compactMap({ $0 as? UIWindowScene })
             .first?.windows.first else { return }
         
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let authVC = storyboard.instantiateViewController(withIdentifier: "AuthViewController")
+        let splashVC = SplashViewController()
         
-        window.rootViewController = authVC
+        window.rootViewController = splashVC
         window.makeKeyAndVisible()
         UIView.transition(with: window,
                           duration: 0.5,

@@ -46,22 +46,21 @@ final class ImagesListViewController: UIViewController {
     // MARK: - Methods
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == showSingleImageSegueIdentifier {
-            guard
-                let viewController = segue.destination as? SingleImageViewController,
-                let indexPath = sender as? IndexPath
-            else {
-                assertionFailure("Invalid segue destination")
-                return
-            }
-            
-            let photo = photos[indexPath.row]
-            if let url = URL(string: photo.fullImageURL) {
-                viewController.imageURL = url
-            }
-        } else {
+        guard segue.identifier == showSingleImageSegueIdentifier else {
             super.prepare(for: segue, sender: sender)
+            return
         }
+        
+        guard
+            let viewController = segue.destination as? SingleImageViewController,
+            let indexPath = sender as? IndexPath
+        else {
+            assertionFailure("Invalid segue destination")
+            return
+        }
+        
+        let photo = photos[indexPath.row]
+        viewController.imageURL = URL(string: photo.fullImageURL)
     }
     
     @objc func updateTableViewAnimated() {
@@ -149,23 +148,24 @@ extension ImagesListViewController: UITableViewDataSource {
 extension ImagesListViewController: ImageListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
+        
         let photo = photos[indexPath.row]
+        let newIsLiked = !photo.isLiked
         
         UIBlockingProgressHUD.show()
-        cell.setIsLiked(!photo.isLiked)
+        cell.setIsLiked(newIsLiked)
         
-        imageListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
+        imageListService.changeLike(photoId: photo.id, isLike: newIsLiked) { [weak self] result in
             guard let self else { return }
             
             UIBlockingProgressHUD.dismiss()
+            
             switch result {
-            case .success():
+            case .success:
                 self.photos = self.imageListService.photos
                 cell.setIsLiked(self.photos[indexPath.row].isLiked)
                 
-                UIBlockingProgressHUD.dismiss()
             case .failure(let error):
-                UIBlockingProgressHUD.dismiss()
                 print("Ошибка при лайке:", error)
                 cell.setIsLiked(photo.isLiked)
                 

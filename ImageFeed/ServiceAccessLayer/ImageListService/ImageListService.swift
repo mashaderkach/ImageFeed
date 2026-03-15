@@ -16,6 +16,8 @@ final class ImageListService {
     
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
+    private let isoDateFormatter = ISO8601DateFormatter()
+    
     // MARK: - Methods
     
     func fetchPhotosNextPage() {
@@ -23,57 +25,74 @@ final class ImageListService {
         
         let nextPage = (lastLoadedPage ?? 0) + 1
         
-        var urlComponents = URLComponents()
-        urlComponents.scheme = "https"
-        urlComponents.host = "api.unsplash.com"
-        urlComponents.path = "/photos"
-        urlComponents.queryItems = [
-            URLQueryItem(name: "page", value: "\(nextPage)"),
-            URLQueryItem(name: "per_page", value: "10")
-            
-        ]
-        
-        guard let url = urlComponents.url else { return }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = HTTPMethod.get.rawValue
-        
-        guard let token = OAuth2Service.shared.authToken else { return }
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        guard let request = makePhotosRequest(page: nextPage) else { return }
         
         task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<[PhotoResult], Error>) in
             guard let self else { return }
             
             DispatchQueue.main.async {
-                switch result {
-                case .success(let photoResult):
-                    let newPhotos = photoResult.map { result in
-                        Photo(
-                            id: result.id,
-                            size: CGSize(width: result.width, height: result.height),
-                            createdAt: ISO8601DateFormatter().date(from: result.createdAt ?? ""),
-                            welcomeDescription: result.description,
-                            thumbImageURL: result.urls.thumb,
-                            largeImageURL: result.urls.full,
-                            fullImageURL: result.urls.full,
-                            isLiked: result.likedByUser
-                        )
-                    }
-                    
-                    self.photos.append(contentsOf: newPhotos)
-                    self.lastLoadedPage = nextPage
-                    self.task = nil
-                    
-                    NotificationCenter.default.post(
-                        name: Self.didChangeNotification,
-                        object: nil
-                    )
-                case .failure(let error):
-                    print(error)
-                }
+                self.handleFetchResult(result, nextPage: nextPage)
             }
         }
+        
         task?.resume()
+    }
+
+    private func makePhotosRequest(page: Int) -> URLRequest? {
+        var urlComponents = URLComponents()
+        urlComponents.scheme = "https"
+        urlComponents.host = "api.unsplash.com"
+        urlComponents.path = "/photos"
+        urlComponents.queryItems = [
+            URLQueryItem(name: "page", value: "\(page)"),
+            URLQueryItem(name: "per_page", value: "10")
+        ]
+        
+        guard let url = urlComponents.url else { return nil }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = HTTPMethod.get.rawValue
+        
+        guard let token = OAuth2Service.shared.authToken else { return nil }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        return request
+    }
+
+    private func handleFetchResult(
+        _ result: Result<[PhotoResult], Error>,
+        nextPage: Int
+    ) {
+        switch result {
+            
+        case .success(let photoResult):
+            let newPhotos = photoResult.map { mapPhoto($0) }
+            
+            photos.append(contentsOf: newPhotos)
+            lastLoadedPage = nextPage
+            task = nil
+            
+            NotificationCenter.default.post(
+                name: Self.didChangeNotification,
+                object: nil
+            )
+            
+        case .failure(let error):
+            print(error)
+        }
+    }
+
+    private func mapPhoto(_ result: PhotoResult) -> Photo {
+        Photo(
+            id: result.id,
+            size: CGSize(width: result.width, height: result.height),
+            createdAt: ISO8601DateFormatter().date(from: result.createdAt ?? ""),
+            welcomeDescription: result.description,
+            thumbImageURL: result.urls.thumb,
+            largeImageURL: result.urls.full,
+            fullImageURL: result.urls.full,
+            isLiked: result.likedByUser
+        )
     }
     
     func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
