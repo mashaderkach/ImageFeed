@@ -86,7 +86,7 @@ final class ImageListService {
         Photo(
             id: result.id,
             size: CGSize(width: result.width, height: result.height),
-            createdAt: ISO8601DateFormatter().date(from: result.createdAt ?? ""),
+            createdAt: isoDateFormatter.date(from: result.createdAt ?? ""),
             welcomeDescription: result.description,
             thumbImageURL: result.urls.thumb,
             largeImageURL: result.urls.full,
