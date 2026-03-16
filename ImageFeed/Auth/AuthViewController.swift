@@ -47,6 +47,27 @@ final class AuthViewController: UIViewController {
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem?.tintColor = UIColor(hex: "#1A1B22")
     }
+    
+    private func showTabBarController() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let tabBarController = storyboard.instantiateViewController(withIdentifier: "TabBarViewController") as? UITabBarController else {
+            assertionFailure("TabBarController not found in storyboard")
+            return
+        }
+        
+        guard let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first?.windows.first else { return }
+        
+        window.rootViewController = tabBarController
+        window.makeKeyAndVisible()
+        
+        UIView.transition(with: window,
+                          duration: 0.5,
+                          options: .transitionCrossDissolve,
+                          animations: nil,
+                          completion: nil)
+    }
 }
 
 // MARK: - Extensions
@@ -65,7 +86,11 @@ extension AuthViewController: WebViewViewControllerDelegate {
             
             switch result {
             case .success:
-                self.delegate?.didAuthenticate(self)
+                if let delegate = self.delegate {
+                    delegate.didAuthenticate(self)
+                } else {
+                    self.showTabBarController()
+                }
             case .failure:
                 self.showAuthErrorAlert()
             }

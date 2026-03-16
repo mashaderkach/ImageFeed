@@ -13,6 +13,7 @@ final class ProfileViewController: UIViewController {
     private var descriptionLabel: UILabel!
     private var logoutButton: UIButton!
     private var profileImageServiceObserver: NSObjectProtocol?
+    private var animationLayers = Set<CALayer>()
     
     // MARK: - Lifecycle
     
@@ -77,6 +78,8 @@ final class ProfileViewController: UIViewController {
             descriptionLabel,
             logoutButton
         ].forEach { view.addSubview($0) }
+        
+        logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
     }
     
     private func setupConstraints() {
@@ -139,12 +142,28 @@ final class ProfileViewController: UIViewController {
                     print(value.image)
                     print(value.cacheType)
                     print(value.source)
-                    
                 case .failure(let error):
                     print(error)
                 }
             }
     }
+    
+    @objc private func didTapLogoutButton() {
+        let alert = UIAlertController(
+            title: "Пока, пока!",
+            message: "Уверены, что хотите выйти?",
+            preferredStyle: .alert
+        )
+        
+        let logoutAction = UIAlertAction(title: "Да", style: .destructive) { _ in
+            ProfileLogoutService.shared.logout()
+        }
+        
+        let cancelAction = UIAlertAction(title: "Нет", style: .cancel)
+        
+        alert.addAction(logoutAction)
+        alert.addAction(cancelAction)
+        
+        present(alert, animated: true)
+    }
 }
-
-

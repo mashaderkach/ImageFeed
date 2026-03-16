@@ -9,7 +9,6 @@ enum WebViewConstants {
     static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
 }
 
-
 // MARK: - Protocol
 
 protocol WebViewViewControllerDelegate: AnyObject {
