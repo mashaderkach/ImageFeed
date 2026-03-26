@@ -14,8 +14,8 @@ final class ProfilePresenter: ProfilePresenterProtocol {
     
     private var profileForTesting: Profile?
     init(profileForTesting: Profile? = nil) {
-            self.profileForTesting = profileForTesting
-        }
+        self.profileForTesting = profileForTesting
+    }
     
     func viewDidLoad() {
         updateProfile()
@@ -34,7 +34,7 @@ final class ProfilePresenter: ProfilePresenterProtocol {
     
     private func updateProfile() {
         let profile = profileForTesting ?? ProfileService.shared.profile
-            guard let profile else { return }
+        guard let profile else { return }
         
         view?.updateProfileDetails(
             name: profile.name,

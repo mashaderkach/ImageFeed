@@ -5,14 +5,14 @@ import UIKit
 // MARK: - Protocol
 
 protocol AuthHelperProtocol {
-    func authRequest() -> URLRequest?
-    func code(from url: URL) -> String?
+    func createAuthURLRequest() -> URLRequest?
+    func getCode(from url: URL) -> String?
 }
 
 // MARK: - Сlass
 
 final class AuthHelper: AuthHelperProtocol {
-    let configuration: AuthConfiguration
+    private let configuration: AuthConfiguration
     
     init(configuration: AuthConfiguration = .standard) {
         self.configuration = configuration
@@ -20,7 +20,7 @@ final class AuthHelper: AuthHelperProtocol {
     
     // MARK: - Methods
     
-    func authRequest() -> URLRequest? {
+    func createAuthURLRequest() -> URLRequest? {
         guard let url = authURL() else { return nil }
         
         return URLRequest(url: url)
@@ -41,7 +41,7 @@ final class AuthHelper: AuthHelperProtocol {
         return urlComponents.url
     }
     
-    func code(from url: URL) -> String? {
+func getCode(from url: URL) -> String? {
         if
             let urlComponents = URLComponents(string: url.absoluteString),
             urlComponents.path == "/oauth/authorize/native",
