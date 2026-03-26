@@ -45,6 +45,7 @@
                                                 </label>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zrW-jV-Wfz" userLabel="Like Button">
                                                     <rect key="frame" x="333" y="4" width="44" height="44"/>
+                                                    <accessibility key="accessibilityConfiguration" identifier="like_button"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="44" id="HA1-XK-ZYz"/>
                                                         <constraint firstAttribute="height" constant="44" id="RI1-gc-otX"/>
@@ -121,6 +122,7 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JEw-zh-8xa">
                                 <rect key="frame" x="16" y="646" width="361" height="48"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <accessibility key="accessibilityConfiguration" identifier="Authenticate"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="PiZ-8f-XQ9"/>
                                 </constraints>
@@ -271,7 +273,7 @@
         <!--Web View View Controller-->
         <scene sceneID="LIB-Q7-PBX">
             <objects>
-                <viewController id="tFP-Hf-RWj" customClass="WebViewViewController" customModule="ImageFeed" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="WebViewViewController" id="tFP-Hf-RWj" customClass="WebViewViewController" customModule="ImageFeed" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="PGr-A6-8w4">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -291,6 +293,9 @@
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="hng-4o-Jh2"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <accessibility key="accessibilityConfiguration" identifier="UnsplashWebView">
+                            <bool key="isElement" value="YES"/>
+                        </accessibility>
                         <constraints>
                             <constraint firstItem="hng-4o-Jh2" firstAttribute="trailing" secondItem="8BI-cp-7QH" secondAttribute="trailing" id="2hX-L1-M7e"/>
                             <constraint firstItem="8BI-cp-7QH" firstAttribute="top" secondItem="hng-4o-Jh2" secondAttribute="top" id="77a-zO-SKG"/>
